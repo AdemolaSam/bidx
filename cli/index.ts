@@ -2,7 +2,14 @@
 
 import { Command } from "commander";
 import * as anchor from "@coral-xyz/anchor";
+import {
+  showDashboard,
+  showPlatformStatus,
+  showAuctionList,
+  showHelp,
+} from "./dashboard";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import { getProgram, loadWallet } from "./utils";
 import { Program } from "@coral-xyz/anchor";
 import { Bidx } from "../target/types/bidx";
 import {
@@ -18,33 +25,33 @@ import * as path from "path";
 const program = new Command();
 
 // Load wallet from file
-function loadWallet(walletPath: string): Keypair {
-  const keypairFile = fs.readFileSync(path.resolve(walletPath), "utf-8");
-  const keypairData = JSON.parse(keypairFile);
-  return Keypair.fromSecretKey(new Uint8Array(keypairData));
-}
+// function loadWallet(walletPath: string): Keypair {
+//   const keypairFile = fs.readFileSync(path.resolve(walletPath), "utf-8");
+//   const keypairData = JSON.parse(keypairFile);
+//   return Keypair.fromSecretKey(new Uint8Array(keypairData));
+// }
 
 // Get program
-function getProgram(cluster: string): {
-  program: Program<Bidx>;
-  connection: Connection;
-} {
-  const connection = new Connection(
-    cluster === "devnet"
-      ? "https://api.devnet.solana.com"
-      : "http://localhost:8899",
-  );
+// function getProgram(cluster: string): {
+//   program: Program<Bidx>;
+//   connection: Connection;
+// } {
+//   const connection = new Connection(
+//     cluster === "devnet"
+//       ? "https://api.devnet.solana.com"
+//       : "http://localhost:8899",
+//   );
 
-  const provider = new anchor.AnchorProvider(
-    connection,
-    anchor.AnchorProvider.env().wallet,
-    {},
-  );
-  anchor.setProvider(provider);
+//   const provider = new anchor.AnchorProvider(
+//     connection,
+//     anchor.AnchorProvider.env().wallet,
+//     {},
+//   );
+//   anchor.setProvider(provider);
 
-  const program = anchor.workspace.Bidx as Program<Bidx>;
-  return { program, connection };
-}
+//   const program = anchor.workspace.Bidx as Program<Bidx>;
+//   return { program, connection };
+// }
 
 // ============ COMMANDS ============
 
@@ -52,6 +59,67 @@ program
   .name("bidx")
   .description("BidX Protocol CLI - Decentralized Auctions on Solana")
   .version("1.0.0");
+
+// CLI DASHBOARD
+program
+  .command("dashboard", { isDefault: true })
+  .description("Launch interactive dashboard")
+  .option("--cluster <url>", "Cluster URL", "devnet")
+  .action(async (options) => {
+    const { program: bidxProgram, connection } = getProgram(options.cluster);
+
+    let running = true;
+    while (running) {
+      const action = await showDashboard();
+
+      switch (action) {
+        case "list":
+          await showAuctionList(bidxProgram);
+          break;
+
+        case "status":
+          // Get platform PDAs
+          const [platformConfig] = anchor.web3.PublicKey.findProgramAddressSync(
+            [Buffer.from("config")],
+            bidxProgram.programId,
+          );
+          const [registry] = anchor.web3.PublicKey.findProgramAddressSync(
+            [Buffer.from("authenticators_registry")],
+            bidxProgram.programId,
+          );
+          await showPlatformStatus(
+            bidxProgram,
+            connection,
+            platformConfig,
+            registry,
+          );
+          break;
+
+        case "help":
+          showHelp();
+          await new Promise((resolve) => {
+            const readline = require("readline").createInterface({
+              input: process.stdin,
+              output: process.stdout,
+            });
+            readline.question("\nPress Enter to continue...", () => {
+              readline.close();
+              resolve(null);
+            });
+          });
+          break;
+
+        case "exit":
+          console.log("\n👋 Goodbye!\n");
+          running = false;
+          break;
+
+        default:
+          console.log(`\n⚠️  Feature "${action}" coming soon!\n`);
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+      }
+    }
+  });
 
 // INITIALIZE PLATFORM
 program

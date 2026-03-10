@@ -9,7 +9,11 @@
     "@coral-xyz/anchor": "^0.32.1",
     "@solana/spl-token": "^0.4.14",
     "@solana/web3.js": "^1.98.4",
-    "commander": "^14.0.3"
+    "@types/figlet": "^1.7.0",
+    "@types/inquirer": "8.2.10",
+    "commander": "^14.0.3",
+    "figlet": "^1.11.0",
+    "inquirer": "8.2.5"
   },
   "bin": {
     "bidx": "./cli/index.ts"
