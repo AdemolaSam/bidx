@@ -67,7 +67,7 @@ export function runPlaceBidTests(getCtx: () => Ctx) {
 
       await program.methods
         .placeBid(bidAmount)
-        .accounts({
+        .accountsPartial({
           bidder: bidder.publicKey,
           bid,
           auction: auctionCtx.auction,
@@ -207,7 +207,7 @@ export function runPlaceBidTests(getCtx: () => Ctx) {
       await assertAnchorError(
         program.methods
           .placeBid(bidAmount)
-          .accounts({
+          .accountsPartial({
             bidder: bidder.publicKey,
             bid,
             auction: pendingAuction.auction,
@@ -256,7 +256,7 @@ export function runPlaceBidTests(getCtx: () => Ctx) {
       await assertAnchorError(
         program.methods
           .placeBid(bidAmount)
-          .accounts({
+          .accountsStrict({
             bidder: bidder.publicKey,
             bid,
             auction: auctionCtx.auction,
@@ -304,7 +304,7 @@ export function runPlaceBidTests(getCtx: () => Ctx) {
       await assertAnchorError(
         program.methods
           .placeBid(tooLow)
-          .accounts({
+          .accountsStrict({
             bidder: bidder.publicKey,
             bid,
             auction: auctionCtx.auction,

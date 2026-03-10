@@ -57,7 +57,7 @@ export function runInitializeTests(getCtx: () => Ctx) {
 
       await program.methods
         .registerAuthenticators([auth1, auth2])
-        .accounts({
+        .accountsPartial({
           admin: platform.admin.publicKey,
           registry: platform.authenticatorsRegistry,
         })
@@ -81,7 +81,7 @@ export function runInitializeTests(getCtx: () => Ctx) {
       await assertAnchorError(
         program.methods
           .registerAuthenticators([Keypair.generate().publicKey])
-          .accounts({
+          .accountsPartial({
             admin: impostor.publicKey,
             registry: platform.authenticatorsRegistry,
           })
@@ -99,7 +99,7 @@ export function runInitializeTests(getCtx: () => Ctx) {
       // Register once
       await program.methods
         .registerAuthenticators([auth])
-        .accounts({
+        .accountsPartial({
           admin: platform.admin.publicKey,
           registry: platform.authenticatorsRegistry,
         })
@@ -116,7 +116,7 @@ export function runInitializeTests(getCtx: () => Ctx) {
         program.methods
           .registerAuthenticators([auth])
           .preInstructions([memoIx])
-          .accounts({
+          .accountsPartial({
             admin: platform.admin.publicKey,
             registry: platform.authenticatorsRegistry,
           })
@@ -132,7 +132,7 @@ export function runInitializeTests(getCtx: () => Ctx) {
       await assertAnchorError(
         program.methods
           .registerAuthenticators([platform.admin.publicKey])
-          .accounts({
+          .accountsPartial({
             admin: platform.admin.publicKey,
             registry: platform.authenticatorsRegistry,
           })

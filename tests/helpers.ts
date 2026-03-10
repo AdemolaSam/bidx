@@ -309,7 +309,7 @@ export async function setupPlatform(
       authenticators,
       AUTH_FEE_BPS,
     )
-    .accounts({
+    .accountsPartial({
       admin: admin.publicKey,
       platformConfig,
       authenticatorsRegistry,
@@ -440,7 +440,7 @@ export async function setupDigitalNftAuction(
       null,
       { digitalNft: {} },
     )
-    .accounts({
+    .accountsPartial({
       seller: seller.publicKey,
       sellerState,
       auction,
@@ -510,7 +510,7 @@ export async function setupBid(
 
   await program.methods
     .placeBid(bidAmount)
-    .accounts({
+    .accountsPartial({
       bidder: bidder.publicKey,
       bid,
       auction: auctionPDA,

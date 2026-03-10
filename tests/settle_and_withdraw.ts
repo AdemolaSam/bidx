@@ -90,7 +90,7 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
 
       await program.methods
         .settleAuction(new BN(0))
-        .accounts({
+        .accountsStrict({
           winner: winner.bidder.publicKey,
           seller: auctionCtx.seller.publicKey,
           authenticator: Keypair.generate().publicKey,
@@ -186,7 +186,7 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
       await assertAnchorError(
         program.methods
           .settleAuction(new BN(0))
-          .accounts({
+          .accountsStrict({
             winner: winner.bidder.publicKey,
             seller: auctionCtx.seller.publicKey,
             authenticator: Keypair.generate().publicKey,
@@ -273,7 +273,7 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
       await assertAnchorError(
         program.methods
           .settleAuction(new BN(0))
-          .accounts({
+          .accountsStrict({
             winner: impostorBid.bidder.publicKey,
             seller: auctionCtx.seller.publicKey,
             authenticator: Keypair.generate().publicKey,
@@ -352,7 +352,7 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
       await assertAnchorError(
         program.methods
           .settleAuction(new BN(0))
-          .accounts({
+          .accountsStrict({
             winner: lowBidder.bidder.publicKey,
             seller: auctionCtx.seller.publicKey,
             authenticator: Keypair.generate().publicKey,
@@ -427,7 +427,7 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
 
       await program.methods
         .withdrawBid(new BN(0)) // NOTE: pass auction nonce (0) to match WithdrawBid PDA seeds
-        .accounts({
+        .accountsStrict({
           bidder: loserBid.bidder.publicKey,
           seller: auctionCtx.seller.publicKey,
           auction: auctionCtx.auction,
@@ -458,7 +458,7 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
       await assertAnchorError(
         program.methods
           .withdrawBid(new BN(0)) // NOTE: pass auction nonce (0) to match WithdrawBid PDA seeds
-          .accounts({
+          .accountsStrict({
             bidder: winnerBid.bidder.publicKey,
             seller: auctionCtx.seller.publicKey,
             auction: auctionCtx.auction,
@@ -496,7 +496,7 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
       await assertAnchorError(
         program.methods
           .withdrawBid(new BN(0)) // NOTE: pass auction nonce (0) to match WithdrawBid PDA seeds
-          .accounts({
+          .accountsStrict({
             bidder: bidder.bidder.publicKey,
             seller: freshAuction.seller.publicKey,
             auction: freshAuction.auction,

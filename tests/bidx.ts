@@ -45,7 +45,7 @@ describe("bidx", () => {
     if (!platform) return;
     await program.methods
       .closePlatform()
-      .accounts({
+      .accountsStrict({
         admin: platform.admin.publicKey,
         platformConfig: platform.platformConfig,
         authenticatorsRegistry: platform.authenticatorsRegistry,

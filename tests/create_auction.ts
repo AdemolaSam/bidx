@@ -123,7 +123,7 @@ export function runCreateAuctionTests(getCtx: () => Ctx) {
           null,
           { digitalNft: {} },
         )
-        .accounts({
+        .accountsStrict({
           seller: seller.publicKey,
           sellerState,
           auction,
@@ -181,7 +181,7 @@ export function runCreateAuctionTests(getCtx: () => Ctx) {
             null,
             { digitalNft: {} },
           )
-          .accounts({
+          .accountsStrict({
             seller: seller.publicKey,
             sellerState,
             auction,
@@ -218,7 +218,7 @@ export function runCreateAuctionTests(getCtx: () => Ctx) {
             null,
             { digitalNft: {} },
           )
-          .accounts({
+          .accountsStrict({
             seller: seller.publicKey,
             sellerState,
             auction,
@@ -255,7 +255,7 @@ export function runCreateAuctionTests(getCtx: () => Ctx) {
             null,
             { digitalNft: {} },
           )
-          .accounts({
+          .accountsStrict({
             seller: seller.publicKey,
             sellerState,
             auction,

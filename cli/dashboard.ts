@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import figlet from "figlet";
-import inquirer from "inquirer";
+import inquirer, { Separator } from "inquirer";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { Program } from "@coral-xyz/anchor";
 import { Bidx } from "../target/types/bidx";
@@ -23,8 +23,8 @@ export async function showDashboard() {
   console.log(chalk.gray("━".repeat(70)));
   console.log("");
 
-  // Main Menu
-  const { action } = await inquirer.prompt([
+  // Main Menu - FIX: Use proper type
+  const answers = await inquirer.prompt<{ action: string }>([
     {
       type: "list",
       name: "action",
@@ -60,7 +60,7 @@ export async function showDashboard() {
           name: `${chalk.red("💸")} Withdraw Funds`,
           value: "withdraw",
         },
-        new inquirer.Separator(),
+        new Separator(), // ← Now properly imported
         {
           name: `${chalk.white("⚙️ ")} Platform Status`,
           value: "status",
@@ -69,7 +69,7 @@ export async function showDashboard() {
           name: `${chalk.white("👤")} My Account Info`,
           value: "account",
         },
-        new inquirer.Separator(),
+        new Separator(),
         {
           name: `${chalk.gray("❓")} Help & Commands`,
           value: "help",
@@ -83,7 +83,7 @@ export async function showDashboard() {
     },
   ]);
 
-  return action;
+  return answers.action; // ← Fix: Use answers.action instead of destructuring
 }
 
 export async function showPlatformStatus(
