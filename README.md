@@ -4,6 +4,199 @@ BidX is an open-source auction protocol on Solana for high-value digital and phy
 
 Read the full project proposal here: [BidX-Protocol full proposal](https://docs.google.com/document/d/1aXTD0X6sAnh9L7fHNwXLEFFMvSHGfe6dRo3Q-SViKsQ/edit?usp=sharing)
 
+## WHY SOLANA? WEB2 vs WEB3 ARCHITECTURE
+
+### Traditional Web2 Auction Backend
+
+**Stack:**
+
+```
+Users → Express/Django API → PostgreSQL → Redis Cache → Stripe
+                ↓
+        Background Workers (Celery/Bull)
+                ↓
+        Email Service + SMS Notifications
+```
+
+**How it works:**
+
+1. **Bidding:** User submits bid → API validates → Write to database → Pub/Sub notification
+2. **Escrow:** Funds held by Stripe (3-7 days hold period)
+3. **Settlement:** Cron job checks expired auctions → Trigger Stripe payment → Email winner → Manual NFT transfer
+4. **Verification:** Admin reviews photos → Manual approval in dashboard
+5. **State:** Stored in Postgres tables (auctions, bids, users, escrows)
+
+**Pain Points:**
+
+- ⏰ **Settlement lag:** 5-30 days (payment processing + shipping)
+- 💰 **High fees:** 10-25% (platform + payment processor + currency conversion)
+- 🌍 **Geographic barriers:** KYC requirements exclude global buyers
+- 🔒 **Trust dependency:** Platform can freeze funds, manipulate bids
+- 🐛 **Failure modes:** Payment fails → rollback → manual reconciliation
+
+---
+
+### BidX on Solana
+
+**Stack:**
+
+```
+Users → Wallet → Solana Program (Rust) → On-Chain Accounts (PDAs)
+                        ↓
+                Event Logs (Indexing)
+```
+
+**How it works:**
+
+1. **Bidding:** User signs transaction → Program validates escrow → Update AuctionAccount PDA → Emit BidPlaced event
+2. **Escrow:** USDC locked in BidAccount PDA (immediate, trustless)
+3. **Settlement:** Winner calls `settle_auction` → Atomic transfer (NFT + funds) in single transaction
+4. **Verification:** Authenticator (from on-chain registry) attests → Update AuthenticationAccount PDA
+5. **State:** Stored in Solana accounts (rent-backed, permanent)
+
+**Architectural Mapping:**
+
+| Web2 Component        | Solana Equivalent           | Implementation                    |
+| --------------------- | --------------------------- | --------------------------------- |
+| **Database Tables**   | Program Accounts (PDAs)     | AuctionAccount, BidAccount, etc.  |
+| **Primary Keys**      | PDA Seeds                   | `[b"auction", seller, nonce]`     |
+| **Foreign Keys**      | Pubkey References           | `auction.seller`, `bid.auction`   |
+| **Indexes**           | Event Logs                  | `emit!(AuctionCreated {...})`     |
+| **Transactions (DB)** | Solana Transactions         | Atomic CPI calls                  |
+| **Cron Jobs**         | User-Triggered Instructions | `settle_auction()` after end_time |
+| **Payment Gateway**   | SPL Token Transfers         | `transfer_checked()` with PDAs    |
+| **Admin Panel**       | Multisig Wallet             | Squads 3-of-5 for config updates  |
+| **Rate Limiting**     | Compute Budget              | 200k CU per instruction           |
+| **Backups**           | Validators + Arweave        | Permanent state replication       |
+
+---
+
+### Key Design Decisions
+
+#### **1. Why PDAs for Escrow?**
+
+**Web2:** Stripe holds funds → requires trust  
+**BidX:** Each bid has its own PDA-controlled token account → program-enforced release
+
+```rust
+[b"bid", bidder_pubkey, auction_pubkey] → BidAccount PDA
+  ↓
+Associated Token Account (owned by BidAccount PDA)
+  ↓
+Locked USDC (only program can release)
+```
+
+#### **2. Why Round-Robin Authenticator Assignment?**
+
+**Web2:** Admin manually assigns verifiers → favoritism risk  
+**BidX:** `next_index % authenticators.len()` → fair, deterministic, no collusion
+
+```rust
+let authenticator = registry.authenticators[registry.next_index as usize];
+registry.next_index = (registry.next_index + 1) % registry.authenticators.len();
+```
+
+#### **3. Why Basis Points for Fees?**
+
+**Web2:** Hardcoded percentages in app config  
+**BidX:** `platform_fee_bps: u16` stored on-chain → admin can update via instruction
+
+```rust
+let platform_fee = (winning_bid * platform_fee_bps) / 10_000;
+// 250 bps = 2.5%
+```
+
+#### **4. Why Optional Authentication Account?**
+
+**Web2:** All items go through same verification flow  
+**BidX:** Digital NFTs skip auth (`auth_status = NotRequired`), Physical RWAs require it
+
+---
+
+### Tradeoffs & Constraints
+
+| Aspect                 | Web2 Winner       | Solana Winner           | Why                     |
+| ---------------------- | ----------------- | ----------------------- | ----------------------- |
+| **Settlement Speed**   | ❌ 5-30 days      | ✅ 400ms                | No intermediaries       |
+| **Global Access**      | ❌ KYC required   | ✅ Wallet only          | Permissionless          |
+| **Fee Transparency**   | ❌ Hidden costs   | ✅ On-chain config      | Immutable               |
+| **Fraud Detection**    | ✅ ML models      | ❌ Registry-based       | Compute limits          |
+| **UX Complexity**      | ✅ Email/password | ❌ Wallet setup         | Web3 learning curve     |
+| **Scalability**        | ✅ Horizontal     | ❌ Vertical (CU limits) | 1400 TPS cap            |
+| **Data Privacy**       | ✅ Private DB     | ❌ Public ledger        | Blockchain transparency |
+| **Dispute Resolution** | ✅ Chargebacks    | ❌ Finality             | No reversal             |
+
+**Constraints We Accepted:**
+
+1. **No Complex ML:** Can't run fraud detection models on-chain → Use registry whitelisting
+2. **Off-Chain Storage:** Authentication docs (photos, PDFs) stored on IPFS → Only hashes on-chain
+3. **Manual Triggering:** Winner must call `settle_auction()` → No auto-execution (could add Clockwork in V2)
+4. **Compute Limits:** Max ~200k CU per instruction → Can't batch-settle 100+ auctions
+5. **Finality:** Settled auctions immutable → Disputes handled off-chain with treasury funds
+
+**What We Gained:**
+
+1. ✅ **Zero Counterparty Risk:** Code enforces escrow, no platform can rug
+2. ✅ **Instant Settlement:** Atomic NFT + fund transfer
+3. ✅ **Transparent Fees:** Hardcoded in PlatformConfig, publicly auditable
+4. ✅ **Permissionless:** No sign-up, no KYC, global access
+5. ✅ **Immutable Provenance:** Every bid, authentication, transfer on-chain forever
+
+---
+
+### State Machine vs REST API
+
+**Web2 Auction Lifecycle (REST):**
+
+```
+POST /auctions        → DB write
+GET /auctions/:id     → DB read
+POST /bids            → DB write + async job
+PATCH /auctions/:id   → DB update (admin only)
+DELETE /auctions/:id  → Soft delete
+```
+
+**BidX Instruction Flow:**
+
+```
+create_auction        → Initialize PDAs (Auction + Authentication)
+place_bid             → Lock escrow + update state
+attest_authentication → Change status (Pending → Active)
+settle_auction        → Atomic transfer + close accounts
+withdraw_bid          → Return funds + close account
+```
+
+**State Transitions:**
+
+```
+Pending → Active → Ended → Settled
+   ↓                 ↓
+Cancelled         Failed
+```
+
+Solana enforces state transitions via `require!()` checks - invalid transitions fail at runtime.
+
+---
+
+### Why This Matters for Traditional Devs
+
+**If you've built:**
+
+- E-commerce checkout → You understand escrow logic
+- Auction sites (eBay clone) → You understand bid validation
+- Subscription billing → You understand state machines
+- RBAC systems → You understand account-based permissions
+
+**Then you can build on Solana** by mapping:
+
+- Database → Accounts (PDAs)
+- Foreign keys → Pubkey references
+- Transactions → Solana transactions (atomic CPIs)
+- Cron jobs → User-triggered instructions
+- Payment APIs → SPL token transfers
+
+**BidX proves you don't need crypto expertise** - just backend architecture knowledge.
+
 ## RUNNING
 
 **REQUIREMENTS**
