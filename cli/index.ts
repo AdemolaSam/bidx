@@ -13,6 +13,7 @@ import { viewCommand } from "./commands/view";
 import { settleCommand } from "./commands/settle";
 import { withdrawCommand } from "./commands/withdraw";
 import { createCommand } from "./commands/create";
+import { bidCommand } from "./commands/bid";
 import * as anchor from "@coral-xyz/anchor";
 
 const program = new Command();
@@ -35,8 +36,12 @@ program
           await initCommand(bidxProgram, connection, options.cluster);
           break;
 
-        case "create": // ← ADD THIS CASE
+        case "create":
           await createCommand(bidxProgram, connection, options.cluster);
+          break;
+
+        case "bid":
+          await bidCommand(bidxProgram, connection, options.cluster);
           break;
 
         case "view":
