@@ -18,9 +18,9 @@ export async function showDashboard() {
     ),
   );
 
-  console.log(chalk.gray("━".repeat(70)));
+  console.log(chalk.gray("━".repeat(5)));
   console.log(chalk.bold.white("  Decentralized Auction Protocol on Solana"));
-  console.log(chalk.gray("━".repeat(70)));
+  console.log(chalk.gray("━".repeat(5)));
   console.log("");
 
   // Main Menu - FIX: Use proper type
@@ -94,7 +94,7 @@ export async function showPlatformStatus(
 ) {
   console.clear();
   console.log(chalk.bold.cyan("\n📊 Platform Status\n"));
-  console.log(chalk.gray("━".repeat(70)));
+  console.log(chalk.gray("━".repeat(5)));
 
   try {
     const config = await program.account.platformConfig.fetch(
@@ -162,7 +162,7 @@ export async function showPlatformStatus(
     );
   }
 
-  console.log(chalk.gray("\n━".repeat(70)));
+  console.log(chalk.gray("\n━".repeat(5)));
   await inquirer.prompt([
     { type: "input", name: "continue", message: "Press Enter to continue..." },
   ]);
@@ -171,7 +171,7 @@ export async function showPlatformStatus(
 export async function showAuctionList(program: Program<Bidx>) {
   console.clear();
   console.log(chalk.bold.cyan("\n📋 Active Auctions\n"));
-  console.log(chalk.gray("━".repeat(70)));
+  console.log(chalk.gray("━".repeat(5)));
 
   try {
     const auctions = await program.account.auction.all();
@@ -225,7 +225,7 @@ export async function showAuctionList(program: Program<Bidx>) {
     console.log(chalk.red(`\n❌ Error fetching auctions: ${error.message}`));
   }
 
-  console.log(chalk.gray("━".repeat(70)));
+  console.log(chalk.gray("━".repeat(5)));
   await inquirer.prompt([
     { type: "input", name: "continue", message: "Press Enter to continue..." },
   ]);
@@ -234,7 +234,7 @@ export async function showAuctionList(program: Program<Bidx>) {
 export function showHelp() {
   console.clear();
   console.log(chalk.bold.cyan("\n❓ BidX CLI Help\n"));
-  console.log(chalk.gray("━".repeat(70)));
+  console.log(chalk.gray("━".repeat(5)));
 
   console.log(chalk.white("\nAvailable Commands:\n"));
 
@@ -279,5 +279,5 @@ export function showHelp() {
     )}`,
   );
 
-  console.log(chalk.gray("\n━".repeat(70)));
+  console.log(chalk.gray("\n━".repeat(5)));
 }

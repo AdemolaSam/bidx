@@ -25,7 +25,7 @@ export async function withdrawCommand(
 ) {
   console.clear();
   console.log(chalk.bold.cyan("\n💸 Withdraw Bid Funds\n"));
-  console.log(chalk.gray("━".repeat(70)));
+  console.log(chalk.gray("━".repeat(5)));
 
   let bidder: Keypair;
   let auction: string;
@@ -120,7 +120,7 @@ export async function withdrawCommand(
     console.log(chalk.red(`\n❌ Error: ${error.message}\n`));
   }
 
-  console.log(chalk.gray("\n━".repeat(70)));
+  console.log(chalk.gray("\n━".repeat(5)));
   await inquirer.prompt([
     { type: "input", name: "continue", message: "Press Enter to continue..." },
   ]);
