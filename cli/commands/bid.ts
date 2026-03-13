@@ -15,7 +15,7 @@ export async function bidCommand(
 ) {
   console.clear();
   console.log(chalk.bold.cyan("\n💰 Place Bid\n"));
-  console.log(chalk.gray("━".repeat(70)));
+  console.log(chalk.gray("━".repeat(5)));
 
   const answers = await inquirer.prompt([
     {
@@ -66,7 +66,7 @@ export async function bidCommand(
     console.log(chalk.red(`\n❌ Error: ${error.message}\n`));
   }
 
-  console.log(chalk.gray("\n━".repeat(70)));
+  console.log(chalk.gray("\n━".repeat(5)));
   await inquirer.prompt([
     { type: "input", name: "continue", message: "Press Enter to continue..." },
   ]);

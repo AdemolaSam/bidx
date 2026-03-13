@@ -19,9 +19,8 @@ const program = new Command();
 
 program.name("bidx").description("BidX Protocol CLI").version("1.0.0");
 
-// ❌ REMOVE isDefault from dashboard
 program
-  .command("dashboard") // ← Remove { isDefault: true }
+  .command("dashboard")
   .description("Launch interactive dashboard")
   .option("--cluster <url>", "Cluster URL", "devnet")
   .action(async (options) => {
@@ -34,6 +33,10 @@ program
       switch (action) {
         case "init":
           await initCommand(bidxProgram, connection, options.cluster);
+          break;
+
+        case "create": // ← ADD THIS CASE
+          await createCommand(bidxProgram, connection, options.cluster);
           break;
 
         case "view":
@@ -197,6 +200,10 @@ program.action(async () => {
     switch (action) {
       case "init":
         await initCommand(bidxProgram, connection, "devnet");
+        break;
+
+      case "create":
+        await createCommand(bidxProgram, connection, "devnet");
         break;
 
       case "view":
