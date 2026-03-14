@@ -65,7 +65,7 @@ export function runPlaceBidTests(getCtx: () => Ctx) {
         ASSOCIATED_TOKEN_PROGRAM_ID,
       );
 
-      await program.methods
+      const placedBidTx = await program.methods
         .placeBid(bidAmount)
         .accountsPartial({
           bidder: bidder.publicKey,
@@ -80,6 +80,8 @@ export function runPlaceBidTests(getCtx: () => Ctx) {
         })
         .signers([bidder])
         .rpc();
+
+      console.log("Place Bid Tx:", placedBidTx);
 
       const bidData = await program.account.bid.fetch(bid);
       expect(bidData.amount.toNumber()).to.equal(bidAmount.toNumber());

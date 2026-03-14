@@ -65,7 +65,7 @@ export function runCreateAuctionTests(getCtx: () => Ctx) {
       );
 
       // Transfer NFT seller -> item_vault before calling create_auction
-      const tx = new Transaction()
+      const nftTx = new Transaction()
         .add(
           createAssociatedTokenAccountInstruction(
             seller.publicKey,
@@ -88,7 +88,9 @@ export function runCreateAuctionTests(getCtx: () => Ctx) {
             TOKEN_PROGRAM_ID,
           ),
         );
-      await sendAndConfirmTransaction(connection, tx, [seller]);
+
+      console.log("ESCROWED ASSET FOR AUCTION:", nftTx);
+      await sendAndConfirmTransaction(connection, nftTx, [seller]);
 
       return {
         nftMint,
@@ -113,7 +115,7 @@ export function runCreateAuctionTests(getCtx: () => Ctx) {
       const startingBid = new BN(1_000_000);
       const reservedPrice = new BN(5_000_000);
 
-      await program.methods
+      const createdAuctionTx = await program.methods
         .createAuction(
           platform.usdcMint,
           startingBid,
@@ -135,6 +137,8 @@ export function runCreateAuctionTests(getCtx: () => Ctx) {
         })
         .signers([seller])
         .rpc();
+
+      console.log("Auction Created:", createdAuctionTx);
 
       const auctionData = await program.account.auction.fetch(auction);
       expect(auctionData.seller.toBase58()).to.equal(

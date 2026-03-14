@@ -88,7 +88,7 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
       );
       await sendAndConfirmTransaction(connection, setupTx, [winner.bidder]);
 
-      await program.methods
+      const settleAuctionTx = await program.methods
         .settleAuction(new BN(0))
         .accountsStrict({
           winner: winner.bidder.publicKey,
@@ -113,6 +113,8 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
         .signers([winner.bidder])
         .rpc();
 
+      console.log("Settle Auction TX", settleAuctionTx);
+
       // NFT arrived at winner
       const winnerNft = await getAccount(
         connection,
@@ -120,6 +122,8 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
         undefined,
         TOKEN_PROGRAM_ID,
       );
+
+      console.log("Winner's Transferred NFT:", winnerNft);
       expect(Number(winnerNft.amount)).to.equal(1);
 
       // Auction is Settled
@@ -425,7 +429,7 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
         TOKEN_PROGRAM_ID,
       );
 
-      await program.methods
+      const withwrawBidTx = await program.methods
         .withdrawBid(new BN(0)) // NOTE: pass auction nonce (0) to match WithdrawBid PDA seeds
         .accountsStrict({
           bidder: loserBid.bidder.publicKey,
@@ -440,6 +444,8 @@ export function runSettleAndWithdrawTests(getCtx: () => Ctx) {
         })
         .signers([loserBid.bidder])
         .rpc();
+
+      console.log("Withdraw Bid Tx for non winner:", withwrawBidTx);
 
       const after = await getAccount(
         connection,

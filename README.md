@@ -230,6 +230,12 @@ Devnet (full suite; platform PDAs are derived from the admin wallet):
 anchor test --provider.cluster devnet
 ```
 
+Launch CLI
+
+```bash
+yarn cli
+```
+
 Note: On devnet, tests fund new accounts by transferring SOL from your `ANCHOR_WALLET`.
 Make sure that wallet is funded before running tests. The test helpers default to
 funding 0.05 SOL per new account, and the admin gets 0.5 SOL, so a full devnet run
@@ -237,6 +243,124 @@ stays under ~3 SOL total.
 
 Devnet timing: auctions use a 20s start delay and 60s duration to avoid clock skew,
 so the settle/withdraw suite takes longer on devnet.
+
+## CLI USAGE
+
+BidX includes an interactive terminal interface for managing auctions.
+
+### Installation
+
+```bash
+yarn install
+```
+
+### Interactive Dashboard
+
+Launch the full-featured dashboard:
+
+```bash
+yarn cli
+# or
+yarn cli dashboard
+```
+
+**Features:**
+
+- 🎨 Create auctions (digital NFT or physical RWA)
+- 📋 List all active auctions
+- 💰 Place bids with escrow locking
+- 🏆 Settle completed auctions
+- 💸 Withdraw funds from outbid positions
+- ⚙️ View platform status
+- 🔍 Inspect auction details
+
+### Direct Commands
+
+Skip the dashboard and use commands directly:
+
+```bash
+# List all auctions
+yarn cli list
+
+# View auction details
+yarn cli view --auction <AUCTION_PUBKEY>
+
+# Create auction
+yarn cli create \
+  --seller ~/.config/solana/id.json \
+  --type digital \
+  --starting 1 \
+  --reserve 5 \
+  --duration 3600
+
+# Place bid
+yarn cli bid \
+  --bidder ~/.config/solana/id.json \
+  --auction <AUCTION_PUBKEY> \
+  --amount 10
+
+# Settle auction (winner)
+yarn cli settle \
+  --winner ~/.config/solana/id.json \
+  --auction <AUCTION_PUBKEY>
+
+# Withdraw bid (losers)
+yarn cli withdraw \
+  --bidder ~/.config/solana/id.json \
+  --auction <AUCTION_PUBKEY>
+```
+
+### Command Reference
+
+| Command             | Description                  |
+| ------------------- | ---------------------------- |
+| `yarn cli`          | Launch interactive dashboard |
+| `yarn cli list`     | List all auctions            |
+| `yarn cli view`     | View auction details         |
+| `yarn cli create`   | Create new auction           |
+| `yarn cli bid`      | Place bid on auction         |
+| `yarn cli settle`   | Settle ended auction         |
+| `yarn cli withdraw` | Withdraw outbid funds        |
+| `yarn cli status`   | View platform configuration  |
+
+**Demo Video:** [Watch CLI in action](YOUR_LOOM_VIDEO_LINK) _(optional but impressive)_
+
+## DEVNET DEPLOYMENT
+
+**Program ID:** `2skNLUQeMc1ZBKPPXEuUEms2WvREu2TpVT5R7JvWzNVm`
+
+**Live on Solana Devnet** - Explore the deployed program:
+
+- [View Program on Solana Explorer](https://explorer.solana.com/address/2skNLUQeMc1ZBKPPXEuUEms2WvREu2TpVT5R7JvWzNVm?cluster=devnet)
+
+### Example Transactions
+
+These are real transactions you can inspect on Solana Explorer:
+
+**1. Platform Initialization**  
+Creates the BidX platform with fee configuration and authenticator registry.  
+[View Transaction →](https://explorer.solana.com/tx/3eTjydrS18btH3W8MAZJCQECTzbzpL2KYcVqK7HA9T8aNYc5Tfv3b8tY2yZuQkNfUQthoahTPSomjctQdQYrhoKH?cluster=devnet)
+
+**2. Auction Created**  
+Seller creates a digital NFT auction with starting bid and reserve price.  
+[View Transaction →](https://explorer.solana.com/tx/2RqKDjUsvcVA3bgS5JoApehqSmbkdWFGYiZdNpKUN9TFm4BLA4xnh927UEzr51reW5zwHCK5755ve45YsfKE4au?cluster=devnet)
+
+**3. Bid Placed (Escrow Locked)**  
+Bidder places bid and USDC is locked in escrow PDA.  
+[View Transaction →](https://explorer.solana.com/tx/3C5LjHxExT5AzyAhuCdq8SzkVPLLMBXF1W8xvWqgz6oWNhywEBu24yktjazyxrCdYPGq7C6VbVFHReosUMUmpwXh?cluster=devnet)
+
+**4. Auction Settled (Atomic Transfer)**  
+Winner receives NFT, seller receives funds, platform receives fees - all in one transaction.  
+[View Transaction →](https://explorer.solana.com/tx/2HPahPSJE9PiJtBNAqvKuUxh9VPJVbRcQPXhUdtrBtsAKVwaQQgMQwSee3ZtY8CMP8DmcZsaKnw3keF9z81xmqHT?cluster=devnet)
+
+**5. Bid Withdrawn (Loser Refunded)**  
+Outbid user withdraws their locked USDC from escrow.  
+[View Transaction →](https://explorer.solana.com/tx/3DrCq9nV8mZF2iP9YCmDWM5xD8UMJfZaaEAswhC3fFZ8K5ZdU5agbKbSvUeQphtcHvkqErrtW95JoSArpcZPxAGc?cluster=devnet)
+
+### Inspect Live Accounts
+
+- **Program Account:** [View on Explorer](https://explorer.solana.com/address/2skNLUQeMc1ZBKPPXEuUEms2WvREu2TpVT5R7JvWzNVm?cluster=devnet)
+- **Example Auction:** [dX5sZ7LzvECdMc6AohFNqFjudgA6CLp6qqEUCEv5opk](https://explorer.solana.com/address/dX5sZ7LzvECdMc6AohFNqFjudgA6CLp6qqEUCEv5opk?cluster=devnet)
 
 ## BIDX Protocol's Architectural Diagram
 

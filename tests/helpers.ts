@@ -301,7 +301,7 @@ export async function setupPlatform(
     ASSOCIATED_TOKEN_PROGRAM_ID,
   );
 
-  await program.methods
+  const platformInitTx = await program.methods
     .initialize(
       PLATFORM_FEE_BPS,
       MIN_AUCTION_DURATION,
@@ -323,6 +323,8 @@ export async function setupPlatform(
     })
     .signers([admin])
     .rpc();
+
+  console.log("Platform Init:", platformInitTx);
 
   return {
     admin,
