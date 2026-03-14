@@ -323,7 +323,7 @@ yarn cli withdraw \
 | `yarn cli withdraw` | Withdraw outbid funds        |
 | `yarn cli status`   | View platform configuration  |
 
-**Demo Video:** [Watch CLI in action](YOUR_LOOM_VIDEO_LINK) _(optional but impressive)_
+<!-- **Demo Video:** [Watch CLI in action](link) -->
 
 ## DEVNET DEPLOYMENT
 
